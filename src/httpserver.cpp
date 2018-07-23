@@ -239,6 +239,17 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
         return;
     }
 
+    if (hreq->GetRequestMethod() == HTTPRequest::OPTIONS) {
+        struct evkeyvalq* evkv = evhttp_request_get_output_headers(req);
+        evhttp_add_header(evkv, "Access-Control-Allow-Origin", "*");
+        evhttp_add_header(evkv, "Vary", "Origin");
+        evhttp_add_header(evkv, "Vary", "Access-Control-Request-Method");
+        evhttp_add_header(evkv, "Vary", "Access-Control-Request-Headers");
+        evhttp_add_header(evkv, "Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token");
+        evhttp_add_header(evkv, "Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+        hreq->WriteReply(HTTP_OK);
+        return;
+    }
     // Find registered handler for prefix
     std::string strURI = hreq->GetURI();
     std::string path;
@@ -640,6 +651,9 @@ HTTPRequest::RequestMethod HTTPRequest::GetRequestMethod()
         break;
     case EVHTTP_REQ_PUT:
         return PUT;
+        break;
+    case EVHTTP_REQ_OPTIONS:
+        return OPTIONS;
         break;
     default:
         return UNKNOWN;
