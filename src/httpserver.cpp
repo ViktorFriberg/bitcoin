@@ -242,14 +242,12 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
         return;
     }
 
+    hreq->WriteHeader("Access-Control-Allow-Origin", "*");
+    hreq->WriteHeader("Access-Control-Allow-Credentials", "true");
+    hreq->WriteHeader("Access-Control-Allow-Headers", "Authorization, Content-Length, Content-Type, Origin, Accept, token");
+    hreq->WriteHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+    
     if (hreq->GetRequestMethod() == HTTPRequest::OPTIONS) {
-        struct evkeyvalq* evkv = evhttp_request_get_output_headers(req);
-        evhttp_add_header(evkv, "Access-Control-Allow-Origin", "*");
-        evhttp_add_header(evkv, "Vary", "Origin");
-        evhttp_add_header(evkv, "Vary", "Access-Control-Request-Method");
-        evhttp_add_header(evkv, "Vary", "Access-Control-Request-Headers");
-        evhttp_add_header(evkv, "Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token");
-        evhttp_add_header(evkv, "Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
         hreq->WriteReply(HTTP_OK);
         return;
     }
